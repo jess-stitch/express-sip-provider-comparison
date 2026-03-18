@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stitch Express — Provider Comparison Tool</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-page: #f4f4f5;
+      --surface: #ffffff;
+      --surface-2: #fafafa;
+      --text: #18181b;
+      --text-muted: #71717a;
+      --text-faint: #a1a1aa;
+      --accent-bar-rec: #16a34a;
+      --accent-bar-con: #ca8a04;
+      --accent-bar-bad: #dc2626;
+      --accent-bar-conf: #a16207;
+      --neutral-bar: #a1a1aa;
+      --green-bg: rgba(22, 163, 74, 0.1);
+      --green-text: #15803d;
+      --amber-bg: rgba(202, 138, 4, 0.12);
+      --amber-text: #a16207;
+      --red-bg: rgba(220, 38, 38, 0.1);
+      --red-text: #b91c1c;
+      --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 14px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.03), 0 12px 32px rgba(0, 0, 0, 0.06);
+      --shadow-sticky: 0 8px 24px rgba(0, 0, 0, 0.06);
+      --header-h: 52px;
+      --sticky-filters-h: auto;
+      --radius: 10px;
+      --radius-lg: 12px;
+      --font-ui: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    [data-theme="dark"] {
+      --bg-page: #09090b;
+      --surface: #141417;
+      --surface-2: #1a1a1e;
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --text-faint: #71717a;
+      --accent-bar-rec: #22c55e;
+      --accent-bar-con: #eab308;
+      --accent-bar-bad: #f87171;
+      --accent-bar-conf: #fbbf24;
+      --neutral-bar: #71717a;
+      --green-bg: rgba(34, 197, 94, 0.12);
+      --green-text: #4ade80;
+      --amber-bg: rgba(234, 179, 8, 0.12);
+      --amber-text: #fbbf24;
+      --red-bg: rgba(248, 113, 113, 0.1);
+      --red-text: #fca5a5;
+      --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.25);
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2), 0 4px 20px rgba(0, 0, 0, 0.15);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+      --shadow-sticky: 0 12px 40px rgba(0, 0, 0, 0.45);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-ui);
+      background: var(--bg-page);
+      color: var(--text);
+      line-height: 1.5;
+      font-size: 14px;
+      -webkit-font-smoothing: antialiased;
+    }
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background: color-mix(in srgb, var(--bg-page) 88%, transparent);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 0 1.5rem;
+      min-height: var(--header-h);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      box-shadow: var(--shadow-xs);
+    }
+    .sticky-header h1 {
+      margin: 0;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      letter-spacing: -0.025em;
+      color: var(--text);
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+    .toggle-wrap input { accent-color: var(--accent-bar-rec); cursor: pointer; }
+    .btn {
+      font-family: inherit;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      border: none;
+      background: var(--surface-2);
+      color: var(--text);
+      cursor: pointer;
+      box-shadow: var(--shadow-xs);
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn:hover { background: color-mix(in srgb, var(--surface) 60%, var(--text) 6%); }
+    .btn-primary {
+      background: var(--text);
+      color: var(--surface);
+      box-shadow: none;
+    }
+    [data-theme="dark"] .btn-primary { background: #e4e4e7; color: #18181b; }
+    .btn-primary:hover { opacity: 0.92; }
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      box-shadow: none;
+      border: 1px solid color-mix(in srgb, var(--text) 18%, transparent);
+    }
+    .btn-secondary:hover {
+      background: color-mix(in srgb, var(--text) 5%, transparent);
+    }
+    [data-theme="dark"] .btn-secondary {
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+    .btn-ghost {
+      background: transparent;
+      box-shadow: none;
+      color: var(--text-muted);
+    }
+    .btn-ghost:hover { color: var(--text); background: color-mix(in srgb, var(--text) 6%, transparent); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+    }
+    .theme-toggle-btn {
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      min-height: 44px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 1.4rem;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: var(--shadow-xs), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s, transform 0.12s;
+    }
+    .theme-toggle-btn:hover {
+      background: color-mix(in srgb, var(--surface) 70%, var(--text) 8%);
+      border-color: color-mix(in srgb, var(--text) 24%, transparent);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+    .theme-toggle-btn:active { transform: scale(0.95); }
+    [data-theme="dark"] .theme-toggle-btn {
+      background: #252528;
+      border-color: rgba(255, 255, 255, 0.14);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+    [data-theme="dark"] .theme-toggle-btn:hover {
+      background: #2e2e32;
+      border-color: rgba(255, 255, 255, 0.22);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
+    }
+    .main { max-width: 1280px; margin: 0 auto; padding: 1.5rem 1.5rem 4rem; }
+    .page-intro {
+      margin-bottom: 1.5rem;
+    }
+    .panel {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 1.125rem 1.25rem;
+      margin-bottom: 0;
+      box-shadow: var(--shadow-sm);
+    }
+    .panel-title {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-faint);
+      margin-bottom: 0.875rem;
+    }
+    .panel-intro-label {
+      font-size: 0.8125rem;
+      font-weight: 400;
+      color: var(--text-muted);
+      letter-spacing: 0.01em;
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+    .merchant-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+    .field label {
+      display: block;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+      letter-spacing: 0.02em;
+    }
+    .field select {
+      width: 100%;
+      padding: 0.45rem 0.65rem;
+      border-radius: 8px;
+      border: none;
+      font-family: inherit;
+      font-size: 0.8125rem;
+      background: var(--surface-2);
+      color: var(--text);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+    }
+    [data-theme="dark"] .field select { box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
+    .sticky-filters-wrap {
+      position: sticky;
+      top: var(--header-h);
+      z-index: 150;
+      margin: 0 -1.5rem 1.25rem;
+      padding: 0 1.5rem 0.75rem;
+      pointer-events: none;
+    }
+    .sticky-filters-wrap > * { pointer-events: auto; }
+    .sticky-filters {
+      background: color-mix(in srgb, var(--bg-page) 82%, transparent);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-radius: var(--radius-lg);
+      padding: 0.875rem 1.125rem;
+      box-shadow: var(--shadow-sticky);
+    }
+    .filter-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 0.75rem 1rem;
+    }
+    .filter-toolbar .field { min-width: 120px; flex: 1 1 120px; max-width: 200px; }
+    .filter-toolbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.65rem;
+      margin-left: auto;
+      padding-bottom: 1px;
+    }
+    .select-visible-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .select-visible-wrap input { accent-color: var(--accent-bar-rec); cursor: pointer; }
+    .badge-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      font-size: 0.6875rem;
+      color: var(--text-muted);
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid color-mix(in srgb, var(--text) 6%, transparent);
+    }
+    .badge-legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
+    .badge-legend.is-hidden { display: none; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 0.875rem;
+    }
+    .device-card {
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      transition: box-shadow 0.2s ease, transform 0.15s ease;
+      border: none;
+      border-top: 3px solid var(--prov-top, rgba(120, 120, 130, 0.35));
+      position: relative;
+    }
+    [data-theme="dark"] .device-card {
+      --prov-top-yoco: #5a7a94;
+      --prov-top-ik: #6b5f88;
+      --prov-top-adumo: #4a7d6a;
+      --prov-top-fnb: #3d5f8a;
+      --prov-top-ned: #5f7d52;
+      --prov-top-absa: #8a6b58;
+      --prov-top-std: #6b5f82;
+      --prov-top-cap: #8a6a48;
+    }
+    .device-card[data-provider="yoco"] { --prov-top: #9db4c8; }
+    .device-card[data-provider="ikhokha"] { --prov-top: #a39bc4; }
+    .device-card[data-provider="adumo"] { --prov-top: #7dafa0; }
+    .device-card[data-provider="fnb"] { --prov-top: #7a9cc9; }
+    .device-card[data-provider="nedbank"] { --prov-top: #8fb87e; }
+    .device-card[data-provider="absa"] { --prov-top: #c4a894; }
+    .device-card[data-provider="stdbank"] { --prov-top: #9b92b8; }
+    .device-card[data-provider="capitec"] { --prov-top: #c49a6e; }
+    .device-card[data-provider="other"] { --prov-top: #b0b0b8; }
+    [data-theme="dark"] .device-card[data-provider="yoco"] { --prov-top: var(--prov-top-yoco); }
+    [data-theme="dark"] .device-card[data-provider="ikhokha"] { --prov-top: var(--prov-top-ik); }
+    [data-theme="dark"] .device-card[data-provider="adumo"] { --prov-top: var(--prov-top-adumo); }
+    [data-theme="dark"] .device-card[data-provider="fnb"] { --prov-top: var(--prov-top-fnb); }
+    [data-theme="dark"] .device-card[data-provider="nedbank"] { --prov-top: var(--prov-top-ned); }
+    [data-theme="dark"] .device-card[data-provider="absa"] { --prov-top: var(--prov-top-absa); }
+    [data-theme="dark"] .device-card[data-provider="stdbank"] { --prov-top: var(--prov-top-std); }
+    [data-theme="dark"] .device-card[data-provider="capitec"] { --prov-top: var(--prov-top-cap); }
+    [data-theme="dark"] .device-card[data-provider="other"] { --prov-top: #6b6b75; }
+    .device-card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      border-radius: 3px 0 0 3px;
+      background: var(--bar, transparent);
+    }
+    .device-card.recommended { --bar: var(--accent-bar-rec); }
+    .device-card.consider { --bar: var(--accent-bar-con); }
+    .device-card.not-suitable { --bar: var(--accent-bar-bad); opacity: 0.97; }
+    .device-card.confirm-provider { --bar: var(--neutral-bar); }
+    .device-card.profile-pending { --bar: transparent; }
+    .device-card.profile-pending .rec-badge-slot { min-height: 0; }
+    .device-card:hover { box-shadow: var(--shadow-md); }
+    .card-inner { padding: 0.75rem 0.875rem 0.75rem 1rem; }
+    .card-head-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .card-check {
+      margin-top: 3px;
+      flex-shrink: 0;
+      width: 15px;
+      height: 15px;
+      accent-color: var(--accent-bar-rec);
+      cursor: pointer;
+    }
+    .card-title-block { flex: 1; min-width: 0; }
+    .card-title-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .provider-device {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.3;
+    }
+    .provider-device .prov {
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 0.75rem;
+    }
+    .provider-device .sep { color: var(--text-faint); margin: 0 0.2rem; font-weight: 400; }
+    .rec-badge {
+      flex-shrink: 0;
+      padding: 0.2rem 0.45rem;
+      border-radius: 6px;
+      font-size: 0.625rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .rec-badge.recommended { background: var(--green-bg); color: var(--green-text); }
+    .rec-badge.consider { background: var(--amber-bg); color: var(--amber-text); }
+    .rec-badge.not-suitable { background: var(--red-bg); color: var(--red-text); }
+    .rec-badge.confirm {
+      background: color-mix(in srgb, var(--text) 8%, transparent);
+      color: var(--text-muted);
+      text-transform: none;
+      font-weight: 600;
+      font-size: 0.6rem;
+      letter-spacing: 0.02em;
+      max-width: 118px;
+      text-align: right;
+      line-height: 1.25;
+      white-space: normal;
+    }
+    [data-theme="dark"] .rec-badge.confirm {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-faint);
+    }
+    .rec-badge-slot:empty { display: none; }
+    .card-purchase {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+      margin-bottom: 0.625rem;
+    }
+    .card-metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.35rem 0.75rem;
+      font-size: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .metric-label {
+      font-size: 0.625rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-faint);
+      margin-bottom: 0.1rem;
+    }
+    .metric-val { font-weight: 500; color: var(--text); line-height: 1.35; word-break: break-word; }
+    .card-simdata {
+      font-size: 0.6875rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+      padding: 0.45rem 0.55rem;
+      border-radius: 8px;
+      background: var(--surface-2);
+      margin-bottom: 0.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.2rem 0.45rem;
+    }
+    .card-simdata-inner { display: flex; flex-direction: column; gap: 0.35rem; width: 100%; }
+    .card-simdata .sd-dot { color: var(--text-faint); user-select: none; }
+    .card-simdata strong {
+      color: var(--text-faint);
+      font-weight: 600;
+      font-size: 0.625rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-right: 0.25rem;
+    }
+    .card-toggle {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      margin: 0 -0.125rem -0.125rem;
+      width: calc(100% + 0.25rem);
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--text-muted);
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+      transition: background 0.15s, color 0.15s;
+    }
+    .card-toggle:hover {
+      background: color-mix(in srgb, var(--text) 4%, transparent);
+      color: var(--text);
+    }
+    .card-detail {
+      display: none;
+      padding: 0 1rem 0.75rem 1rem;
+      background: color-mix(in srgb, var(--surface-2) 70%, var(--surface));
+    }
+    .card-detail.open { display: block; }
+    .detail-table { width: 100%; font-size: 0.75rem; border-collapse: collapse; }
+    .detail-table th, .detail-table td {
+      text-align: left;
+      padding: 0.4rem 0;
+      vertical-align: top;
+      border-bottom: 1px solid color-mix(in srgb, var(--text) 6%, transparent);
+    }
+    .detail-table tr:last-child th, .detail-table tr:last-child td { border-bottom: none; }
+    .detail-table th { color: var(--text-muted); font-weight: 500; width: 36%; font-size: 0.6875rem; }
+    [contenteditable="true"] {
+      outline: 2px solid transparent;
+      border-radius: 4px;
+      min-height: 1.15em;
+    }
+    body.edit-mode [contenteditable="true"]:hover { outline-color: color-mix(in srgb, var(--accent-bar-rec) 35%, transparent); }
+    body.edit-mode [contenteditable="true"]:focus {
+      outline-color: var(--accent-bar-rec);
+      background: color-mix(in srgb, var(--accent-bar-rec) 8%, transparent);
+    }
+    .drawer-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 250;
+      backdrop-filter: blur(2px);
+    }
+    [data-theme="dark"] .drawer-overlay { background: rgba(0, 0, 0, 0.65); }
+    .drawer-overlay.open { display: block; }
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: min(100%, 900px);
+      max-width: 100%;
+      height: 100%;
+      background: var(--surface);
+      z-index: 251;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .drawer.open { transform: translateX(0); }
+    .drawer-header {
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      box-shadow: var(--shadow-xs);
+    }
+    .drawer-header h2 { margin: 0; font-size: 1rem; font-weight: 600; letter-spacing: -0.02em; }
+    .drawer-body { flex: 1; overflow: auto; padding: 1rem 1.25rem; }
+    .compare-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.75rem; }
+    .compare-table th, .compare-table td {
+      padding: 0.5rem 0.65rem;
+      vertical-align: top;
+      border-bottom: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
+    }
+    .compare-table th {
+      background: var(--surface-2);
+      font-weight: 600;
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      min-width: 140px;
+      box-shadow: 2px 0 8px rgba(0,0,0,.03);
+    }
+    .compare-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--surface);
+      border-bottom: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+    }
+    .compare-table .col-device { min-width: 130px; max-width: 190px; }
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    @media (max-width: 768px) {
+      .sticky-header { padding: 0.65rem 1rem; min-height: auto; }
+      .sticky-header h1 { font-size: 0.8125rem; }
+      .main { padding: 1rem 1rem 3rem; }
+      .sticky-filters-wrap { margin: 0 -1rem 1rem; padding: 0 1rem 0.5rem; }
+      .filter-toolbar .field { max-width: none; }
+      .filter-toolbar-actions { margin-left: 0; width: 100%; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .card-metrics { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="sticky-header">
+    <h1>Stitch Express — Provider Comparison</h1>
+    <div class="header-actions">
+      <button type="button" class="theme-toggle-btn" id="themeToggle" title="Toggle light / dark theme" aria-label="Toggle theme">
+        <span class="theme-icon-sun" aria-hidden="true">☀</span>
+        <span class="theme-icon-moon" aria-hidden="true" style="display:none">☽</span>
+      </button>
+      <label class="toggle-wrap">
+        <input type="checkbox" id="editMode" />
+        Edit data
+      </label>
+      <button type="button" class="btn" id="btnSave" style="display:none;">Save</button>
+      <button type="button" class="btn" id="btnReset" style="display:none;">Reset</button>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="page-intro panel">
+      <div class="panel-intro-label">Filter by merchant profile</div>
+      <div class="merchant-grid" id="stitchMerchantProfile">
+        <div class="field">
+          <label for="stitchMpVol">Monthly transaction volume</label>
+          <select id="stitchMpVol" data-mp="vol">
+            <option value="u100k">Under R100K</option>
+            <option value="100-500k">R100K–R500K</option>
+            <option value="500k-5m">R500K–R5M</option>
+            <option value="5m-20m">R5M–R20M</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="stitchMpDevices">Number of devices</label>
+          <select id="stitchMpDevices" data-mp="devices">
+            <option value="1-5">1–5</option>
+            <option value="6-20">6–20</option>
+            <option value="20-100">20–100</option>
+            <option value="100+">100+</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="stitchMpLocs">Number of locations</label>
+          <select id="stitchMpLocs" data-mp="locs">
+            <option value="1">1</option>
+            <option value="2-10">2–10</option>
+            <option value="10-50">10–50</option>
+            <option value="50+">50+</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="sticky-filters-wrap">
+      <div class="sticky-filters">
+        <div class="filter-toolbar">
+          <div class="field">
+            <label for="fCat">Category</label>
+            <select id="fCat">
+              <option value="all">All</option>
+              <option value="PSP">PSP</option>
+              <option value="Bank">Bank</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="fPurchase">Purchase</label>
+            <select id="fPurchase">
+              <option value="all">All</option>
+              <option value="outright">Outright</option>
+              <option value="rental">Rental</option>
+              <option value="both">Buy or rent</option>
+              <option value="free">Free</option>
+              <option value="bespoke">Bespoke</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="fSim">SIM</label>
+            <select id="fSim">
+              <option value="all">All</option>
+              <option value="Yes">Yes</option>
+              <option value="Optional">Optional</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="fPos">POS</label>
+            <select id="fPos">
+              <option value="all">All</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+          <div class="filter-toolbar-actions">
+            <label class="select-visible-wrap" title="Selects up to 4 devices (comparison limit)">
+              <input type="checkbox" id="selectVisible" />
+              Select all visible
+            </label>
+            <button type="button" class="btn btn-primary" id="btnCompare" disabled>Compare (<span id="compareCount">0</span>/4)</button>
+            <button type="button" class="btn btn-secondary" id="btnExport">Export CSV</button>
+          </div>
+        </div>
+        <div class="badge-legend is-hidden" id="badgeLegend">
+          <span><span class="dot" style="background:var(--accent-bar-rec)"></span> Recommended</span>
+          <span><span class="dot" style="background:var(--accent-bar-con)"></span> Consider</span>
+          <span><span class="dot" style="background:var(--accent-bar-bad)"></span> Not suitable</span>
+          <span><span class="dot" style="background:var(--neutral-bar)"></span> Confirm</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cards-grid" id="cardsRoot"></div>
+    <p class="empty-state" id="emptyMsg" style="display:none;">No devices match the current filters.</p>
+  </main>
+
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer-header">
+      <h2>Compare devices</h2>
+      <button type="button" class="btn" id="drawerClose">Close</button>
+    </div>
+    <div class="drawer-body">
+      <table class="compare-table" id="compareTable"></table>
+    </div>
+  </aside>
+
+  <script>
+(function () {
+  const STORAGE_KEY = 'stitch-provider-comparison-v1';
+
+  const FIELD_KEYS = [
+    'provider', 'device', 'category', 'purchaseModel', 'devicePrice', 'transactionRate',
+    'monthlyFees', 'simIncluded', 'dataIncluded', 'wifi', 'simSlots', 'settlement',
+    'posIntegration', 'bestFor', 'notes'
+  ];
+
+  const DEFAULT_DEVICES = [
+    { id: 'yoco-go', provider: 'Yoco', device: 'Go', category: 'PSP', purchaseModel: 'Outright purchase', devicePrice: 'R349', transactionRate: '2.7–2.95% excl VAT', monthlyFees: 'No additional fees', simIncluded: 'No', dataIncluded: 'No', wifi: 'No (uses phone)', simSlots: 'None', settlement: 'Max 2 business days', posIntegration: 'No', bestFor: 'Entry-level mobile', notes: 'Bluetooth only; needs phone.' },
+    { id: 'yoco-neo', provider: 'Yoco', device: 'Neo Touch', category: 'PSP', purchaseModel: 'Outright purchase', devicePrice: 'R999', transactionRate: '2.7–2.95%', monthlyFees: 'R49/mo connectivity fee', simIncluded: 'Yes (Telkom roaming Vodacom+MTN, Yoco-managed, locked to device)', dataIncluded: 'Yes — unlimited 4G', wifi: 'Yes', simSlots: 'Dual', settlement: 'Max 2 business days', posIntegration: 'Yes (3rd party — only Yoco device that does)', bestFor: 'Mobile with POS integration', notes: 'SIM deactivated after 3 months inactivity; free replacement on request.' },
+    { id: 'yoco-khumo', provider: 'Yoco', device: 'Khumo', category: 'PSP', purchaseModel: 'Outright purchase', devicePrice: 'R699', transactionRate: '2.7–2.95%', monthlyFees: 'R49/mo connectivity fee', simIncluded: 'Yes (Telkom roaming, Yoco-managed, locked)', dataIncluded: 'Yes — unlimited 4G', wifi: 'Yes', simSlots: 'Dual', settlement: 'Max 2 business days', posIntegration: 'No (built-in Yoco POS only)', bestFor: 'SME all-in-one', notes: 'Built-in POS, staff profiles, product catalogue. No 3rd-party POS integration.' },
+    { id: 'yoco-khumo-print', provider: 'Yoco', device: 'Khumo Print', category: 'PSP', purchaseModel: 'Outright purchase', devicePrice: 'R1499 + free charging stand', transactionRate: '2.7–2.95%', monthlyFees: 'R49/mo connectivity fee', simIncluded: 'Yes (same as Khumo)', dataIncluded: 'Yes', wifi: 'Yes', simSlots: 'Dual', settlement: 'Max 2 business days', posIntegration: 'No', bestFor: 'Receipt printing on the go', notes: 'Khumo + built-in printer. Thermal rolls included. Charging stand free if bought online only.' },
+    { id: 'ik-tap', provider: 'iKhokha', device: 'Tap on Phone', category: 'PSP', purchaseModel: 'Free (app only)', devicePrice: 'R0', transactionRate: '2.85% + R2.50 per settlement', monthlyFees: 'No additional fees', simIncluded: 'No', dataIncluded: 'No', wifi: 'No (uses phone)', simSlots: 'None', settlement: 'Next day FNB/Absa; else 2–3 days', posIntegration: 'No', bestFor: 'Zero-hardware entry', notes: 'NFC contactless only; no chip and PIN. Android 9+ only; no iOS.' },
+    { id: 'ik-flyer-lite', provider: 'iKhokha', device: 'Flyer Lite', category: 'PSP', purchaseModel: 'Outright purchase', devicePrice: 'R699', transactionRate: '2.75% + R2.50 per settlement', monthlyFees: 'Optional R75/mo SIM fee', simIncluded: 'Optional', dataIncluded: 'Optional (unlimited 4G if R75/mo)', wifi: 'Yes (primary)', simSlots: 'Dual (both optional)', settlement: 'Next day FNB/Absa; else 2–3 days', posIntegration: 'No', bestFor: 'Pocket WiFi-first', notes: 'No printer; no prepaid sales. Pocket-sized. WiFi primary.' },
+    { id: 'ik-flyer', provider: 'iKhokha', device: 'Flyer', category: 'PSP', purchaseModel: 'Outright purchase', devicePrice: 'R1499', transactionRate: '2.75% + R2.50 per settlement', monthlyFees: 'Optional R75/mo SIM fee', simIncluded: 'Optional', dataIncluded: 'Optional', wifi: 'Yes (primary)', simSlots: 'Dual (both optional)', settlement: 'Next day FNB/Absa; else 2–3 days', posIntegration: 'No', bestFor: 'Flagship SME', notes: 'Printer, removable battery, fast-charge dock. Prepaid. Apple Pay & Google Pay.' },
+    { id: 'adumo-flow', provider: 'adumo', device: 'Flow', category: 'PSP', purchaseModel: 'Rental (pricing not published — sales-led)', devicePrice: 'Not published (~R279/mo unconfirmed)', transactionRate: 'Not published', monthlyFees: 'Rental — includes account manager & 24/7 support', simIncluded: 'Yes (adumo-managed)', dataIncluded: 'Yes — 4G', wifi: 'Yes (Bluetooth / WiFi / 4G)', simSlots: 'Dual', settlement: 'Next business day', posIntegration: 'No (standalone only)', bestFor: 'SME retailers', notes: 'Newland SP630 Pro. All card types + adumo Rewards. BNPL & QR. Confirm pricing with adumo.' },
+    { id: 'adumo-connect', provider: 'adumo', device: 'Connect', category: 'PSP', purchaseModel: 'Rental (pricing not published)', devicePrice: 'Not published', transactionRate: 'Not published', monthlyFees: 'Rental — account manager + 24/7 support', simIncluded: 'Yes (adumo-managed)', dataIncluded: 'Yes — 4G', wifi: 'Yes', simSlots: 'Confirm with adumo', settlement: 'Next business day', posIntegration: 'Yes (70+ providers)', bestFor: 'POS-integrated SME', notes: 'Backup device for medium businesses. Confirm specs with adumo.' },
+    { id: 'adumo-infinite', provider: 'adumo', device: 'Infinite', category: 'PSP', purchaseModel: 'Rental (enterprise pricing)', devicePrice: 'Not published', transactionRate: 'Negotiated', monthlyFees: 'Rental — manager + 24/7 + adumo Recon available', simIncluded: 'Yes (adumo-managed)', dataIncluded: 'Yes (Ethernet + 4G + WiFi)', wifi: 'Yes', simSlots: 'Confirm with adumo', settlement: 'Next business day', posIntegration: 'Yes (70+ providers)', bestFor: 'Enterprise', notes: 'PAX A920 Pro. Buy Aids, eBucks, RCS, loyalty, BNPL aggregation. Confirm with adumo.' },
+    { id: 'fnb-go', provider: 'FNB', device: 'Speedpoint Go', category: 'Bank', purchaseModel: 'Buy or rent', devicePrice: 'Buy R699', transactionRate: 'From 1.8% (FNB-banked) / 2.1% (non-banked) — volume tiered', monthlyFees: 'Rental + business account if renting. eBucks can offset.', simIncluded: 'Yes (FNB-managed)', dataIncluded: 'Yes', wifi: 'Yes', simSlots: 'Confirm with FNB', settlement: 'Next business day', posIntegration: 'No', bestFor: 'FNB merchants — portable', notes: 'New March 2026 pricing. Buy = 12-mo warranty. Rent = unlimited warranty + replacement.' },
+    { id: 'fnb-sp', provider: 'FNB', device: 'Speedpoint', category: 'Bank', purchaseModel: 'Buy or rent', devicePrice: 'Buy R1999', transactionRate: 'From 1.8% falling to 0.6% debit / 1.6% credit at high volume (FNB-banked)', monthlyFees: 'Rental + business account. Rental includes tally rolls.', simIncluded: 'Yes (FNB-managed)', dataIncluded: 'Yes', wifi: 'Yes', simSlots: 'Dual', settlement: 'Next business day', posIntegration: 'No', bestFor: 'High-volume FNB workhorse', notes: 'Rental recommended for multi-device fleets — FNB replaces faulty devices.' },
+    { id: 'fnb-counter', provider: 'FNB', device: 'Speedpoint Counter', category: 'Bank', purchaseModel: 'Buy or rent', devicePrice: 'Buy R7499 / Rent R920/mo excl VAT', transactionRate: 'Negotiated for large merchants', monthlyFees: 'Rental + business account. At 200 devices ≈ R184K/mo rental alone.', simIncluded: 'Yes (FNB-managed)', dataIncluded: 'Yes — 4G + WiFi', wifi: 'Yes', simSlots: 'Dual', settlement: 'Next business day', posIntegration: 'Yes', bestFor: 'Countertop + stock', notes: '10" tablet, scanner, printer. Real-time stock & sales.' },
+    { id: 'fnb-speedee', provider: 'FNB', device: 'Speedee App', category: 'Bank', purchaseModel: 'Free', devicePrice: 'None', transactionRate: 'From 1.8% (FNB-banked only)', monthlyFees: 'None', simIncluded: 'No', dataIncluded: 'No', wifi: 'Via phone', simSlots: 'None', settlement: 'Next business day', posIntegration: 'No', bestFor: 'Backup / low volume', notes: 'Tap/contactless only. SoftPOS on FNB App.' },
+    { id: 'ned-pocket', provider: 'Nedbank', device: 'PocketPOS', category: 'Bank', purchaseModel: 'Outright purchase', devicePrice: 'R499 (rebate if Nedbank + turnover — effectively free)', transactionRate: 'From 2.5% excl VAT', monthlyFees: 'Business account fee only', simIncluded: 'No (Bluetooth to phone)', dataIncluded: 'No', wifi: 'Via phone', simSlots: 'None', settlement: 'Same-day priority if Nedbank + targets; else next business day', posIntegration: 'No', bestFor: 'Entry-level wide acceptance', notes: 'Visa, MC, Amex, Diners, UnionPay, Fleet, Garage, Buy Aids. Needs phone.' },
+    { id: 'ned-android', provider: 'Nedbank', device: 'Android POS', category: 'Bank', purchaseModel: 'Outright purchase', devicePrice: 'R1699 (same rebate model)', transactionRate: 'Negotiated from ~2.5%', monthlyFees: 'Business account. GAP Access up to R1.5M.', simIncluded: 'Yes (MTN + Vodacom SIMs in box)', dataIncluded: 'Yes', wifi: 'Yes (LAN available)', simSlots: 'Dual (MTN + Vodacom provided)', settlement: 'Same-day priority if Nedbank + targets; else next business day', posIntegration: 'No', bestFor: 'Best Nedbank standalone', notes: 'Dual-network redundancy. Rebate can make device free.' },
+    { id: 'ned-int', provider: 'Nedbank', device: 'Integrated POS', category: 'Bank', purchaseModel: 'Bespoke (rental or purchase negotiated)', devicePrice: 'Not published', transactionRate: 'Negotiated', monthlyFees: 'Bespoke — hardware, software, PCI, integration', simIncluded: 'Yes', dataIncluded: 'Yes', wifi: 'Yes', simSlots: 'Dual', settlement: 'Negotiated (contract)', posIntegration: 'Yes (fully integrated)', bestFor: '50+ loc / 200+ devices', notes: 'Dedicated sales & bespoke SLA.' },
+    { id: 'absa-mobile', provider: 'Absa', device: 'Mobile Pay', category: 'Bank', purchaseModel: 'Free', devicePrice: 'None', transactionRate: '2.25% debit and credit (flat)', monthlyFees: 'None', simIncluded: 'No', dataIncluded: 'No', wifi: 'Via phone', simSlots: 'None', settlement: 'Standard Absa cycle', posIntegration: 'No', bestFor: 'Absa softPOS entry', notes: 'Contactless only. Android. No chip and PIN.' },
+    { id: 'absa-standalone', provider: 'Absa', device: 'Stand-alone terminals', category: 'Bank', purchaseModel: 'Rental', devicePrice: '~R249/mo excl VAT (desktop)', transactionRate: 'Negotiated', monthlyFees: 'Rental + comms (Fastnet Xlink or Connected only — merchant cost)', simIncluded: 'Not provided (merchant arranges)', dataIncluded: 'Not provided (merchant pays)', wifi: 'Yes via own comms', simSlots: 'Device-dependent', settlement: 'Intraday windows Mon–Sat; 7-day option incl. Sun/public holidays', posIntegration: 'Confirm', bestFor: 'Flexible settlement', notes: 'Unique: merchant pays own comms line. Most flexible settlement.' },
+    { id: 'absa-int', provider: 'Absa', device: 'Integrated / hosted', category: 'Bank', purchaseModel: 'Bespoke', devicePrice: 'Not published', transactionRate: 'Negotiated', monthlyFees: 'Bespoke — Cashback@POS, DCC, finance, MCA, etc.', simIncluded: 'Yes', dataIncluded: 'Yes', wifi: 'Yes', simSlots: 'Dual', settlement: 'Intraday + 7-day option', posIntegration: 'Yes (major SA retailers)', bestFor: 'Large retail', notes: 'Best settlement flexibility. Own POS software.' },
+    { id: 'std-pocketbiz', provider: 'Standard Bank', device: 'PocketBiz', category: 'Bank', purchaseModel: 'Signup fee + monthly rental', devicePrice: 'Free setup + rental (R199/mo min if inactive excl VAT)', transactionRate: 'Negotiated (turnover-based)', monthlyFees: 'Rental + R199/mo min if inactive. 3G / WiFi / Bluetooth.', simIncluded: 'No (Bluetooth to phone)', dataIncluded: 'No', wifi: 'Via phone', simSlots: 'None', settlement: 'Next business day', posIntegration: 'No', bestFor: 'Std Bank entry', notes: 'Min fee even if no transactions. Paired to phone.' },
+    { id: 'std-autolink', provider: 'Standard Bank', device: 'AutoLink', category: 'Bank', purchaseModel: 'Rental only', devicePrice: 'R380/mo excl VAT', transactionRate: 'Negotiated (turnover-dependent)', monthlyFees: 'R380/mo + business fees. 200 devices ≈ R76K/mo.', simIncluded: 'Yes (included in rental)', dataIncluded: 'Yes — 4G', wifi: 'Yes', simSlots: 'Dual', settlement: 'Next business day', posIntegration: 'Confirm (Android — 3rd-party apps)', bestFor: 'Android fleet', notes: 'Tap to Pay. No published buy option.' },
+    { id: 'std-simply', provider: 'Standard Bank', device: 'SimplyBLU', category: 'Bank', purchaseModel: 'Buy or rent', devicePrice: 'Buy R1999 / Rent (NYP)', transactionRate: 'Negotiated', monthlyFees: 'Business account. App + online store + portal free.', simIncluded: 'Yes (Std Bank managed)', dataIncluded: 'Yes — 4G', wifi: 'Yes', simSlots: 'Dual', settlement: 'Next business day', posIntegration: 'Yes (inventory, e-com, merchant app)', bestFor: 'Growing merchants 1–30 loc', notes: 'Scanner, POS, inventory, online store in one.' },
+    { id: 'std-autoswitch', provider: 'Standard Bank', device: 'AutoSwitch', category: 'Bank', purchaseModel: 'Enterprise contract', devicePrice: 'Not published', transactionRate: 'Negotiated', monthlyFees: 'Fully bespoke', simIncluded: 'Yes', dataIncluded: 'Yes', wifi: 'Yes', simSlots: 'Dual', settlement: 'Negotiated', posIntegration: 'Yes (direct to Std Bank acquiring)', bestFor: 'Fast food / large retail / multi-lane', notes: '200+ devices. 3–5s processing. Bespoke SLA.' },
+    { id: 'cap-pro', provider: 'Capitec', device: 'Pro', category: 'Bank', purchaseModel: 'Outright purchase only', devicePrice: 'R699', transactionRate: 'From 1.85% — lowest published; volume tiers', monthlyFees: 'Commission only — no rental/connectivity/settlement fee', simIncluded: 'Yes (Capitec-managed)', dataIncluded: 'Yes', wifi: 'Yes', simSlots: 'Confirm with Capitec', settlement: 'Next business day incl. weekends & public holidays', posIntegration: 'No', bestFor: 'Lowest published rate', notes: 'No fleet management, POS integration, multi-loc reporting, or AM at scale.' },
+    { id: 'cap-print', provider: 'Capitec', device: 'Print', category: 'Bank', purchaseModel: 'Outright purchase only', devicePrice: 'R1399', transactionRate: 'From 1.85%', monthlyFees: 'Commission only', simIncluded: 'Yes (Capitec-managed)', dataIncluded: 'Yes', wifi: 'Yes', simSlots: 'Confirm with Capitec', settlement: 'Next business day incl. weekends & public holidays', posIntegration: 'No', bestFor: 'Receipt + low rate', notes: 'Visa, MC, Amex, Diners, RCS, SASSA. Same limits as Pro.' }
+  ];
+
+  const ENTRY_IDS = new Set(['yoco-go', 'ik-tap', 'ned-pocket', 'std-pocketbiz', 'fnb-speedee']);
+  const ENTERPRISE_IDS = new Set(['ned-int', 'absa-int', 'std-autoswitch']);
+  const CAPITEC_IDS = new Set(['cap-pro', 'cap-print']);
+  const ADUMO_IDS = new Set(['adumo-flow', 'adumo-connect', 'adumo-infinite']);
+
+  function cloneDevices(src) {
+    return src.map(d => ({ ...d }));
+  }
+
+  let devices = cloneDevices(DEFAULT_DEVICES);
+  const selected = new Set();
+  let selectVisibleSync = false;
+
+  const PROFILE_DEFAULTS = { vol: 'u100k', devices: '1-5', locs: '1' };
+  let merchantProfile = { vol: 'u100k', devices: '1-5', locs: '1' };
+
+  function readMerchantProfileFromDom() {
+    const root = document.getElementById('stitchMerchantProfile');
+    if (!root) return;
+    const v = root.querySelector('select[data-mp="vol"]');
+    const d = root.querySelector('select[data-mp="devices"]');
+    const l = root.querySelector('select[data-mp="locs"]');
+    if (v) merchantProfile.vol = v.value;
+    if (d) merchantProfile.devices = d.value;
+    if (l) merchantProfile.locs = l.value;
+  }
+
+  function isProfileNonDefault() {
+    readMerchantProfileFromDom();
+    return (
+      merchantProfile.vol !== PROFILE_DEFAULTS.vol ||
+      merchantProfile.devices !== PROFILE_DEFAULTS.devices ||
+      merchantProfile.locs !== PROFILE_DEFAULTS.locs
+    );
+  }
+
+  function providerSlug(provider) {
+    const p = (provider || '').trim();
+    if (p === 'Standard Bank') return 'stdbank';
+    if (p === 'iKhokha') return 'ikhokha';
+    const map = { Yoco: 'yoco', adumo: 'adumo', FNB: 'fnb', Nedbank: 'nedbank', Absa: 'absa', Capitec: 'capitec' };
+    return map[p] || 'other';
+  }
+
+  function loadStored() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length) {
+        const byId = new Map(DEFAULT_DEVICES.map(d => [d.id, { ...d }]));
+        parsed.forEach(p => {
+          if (p.id && byId.has(p.id)) {
+            FIELD_KEYS.forEach(k => { if (p[k] != null) byId.get(p.id)[k] = String(p[k]); });
+          }
+        });
+        devices = Array.from(byId.values());
+      }
+    } catch (e) { console.warn(e); }
+  }
+
+  function saveStored() {
+    const payload = devices.map(d => {
+      const o = { id: d.id };
+      FIELD_KEYS.forEach(k => o[k] = d[k]);
+      return o;
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  }
+
+  function resetDefaults() {
+    localStorage.removeItem(STORAGE_KEY);
+    devices = cloneDevices(DEFAULT_DEVICES);
+    renderCards();
+    alert('Data reset to defaults.');
+  }
+
+  function getProfile() {
+    readMerchantProfileFromDom();
+    return {
+      vol: merchantProfile.vol,
+      devices: merchantProfile.devices,
+      locs: merchantProfile.locs
+    };
+  }
+
+  function deviceBucketIndex(v) {
+    const m = { '1-5': 0, '6-20': 1, '20-100': 2, '100+': 3 };
+    return m[v] ?? 0;
+  }
+  function locBucketIndex(v) {
+    const m = { '1': 0, '2-10': 1, '10-50': 2, '50+': 3 };
+    return m[v] ?? 0;
+  }
+
+  function getRecommendation(d) {
+    readMerchantProfileFromDom();
+    if (
+      merchantProfile.vol === PROFILE_DEFAULTS.vol &&
+      merchantProfile.devices === PROFILE_DEFAULTS.devices &&
+      merchantProfile.locs === PROFILE_DEFAULTS.locs
+    ) {
+      return { kind: 'neutral', label: '' };
+    }
+
+    const p = getProfile();
+    const devIdx = deviceBucketIndex(p.devices);
+    const locIdx = locBucketIndex(p.locs);
+
+    function bumpYocoUnder100k(rec) {
+      if (rec.kind === 'recommended' && d.provider === 'Yoco' && p.vol === 'u100k') {
+        return { kind: 'consider', label: 'Consider' };
+      }
+      return rec;
+    }
+
+    if (ADUMO_IDS.has(d.id)) return { kind: 'confirm', label: 'Confirm with provider' };
+
+    if (ENTRY_IDS.has(d.id)) {
+      if (devIdx >= 2 || locIdx >= 2) return { kind: 'not-suitable', label: 'Not suitable' };
+    }
+    if (ENTERPRISE_IDS.has(d.id)) {
+      if (devIdx <= 1) return { kind: 'not-suitable', label: 'Not suitable' };
+    }
+    if (CAPITEC_IDS.has(d.id)) {
+      if (locIdx >= 3 || devIdx >= 3) return { kind: 'not-suitable', label: 'Not suitable' };
+    }
+
+    const highDev = devIdx >= 2;
+    const highLoc = locIdx >= 2;
+    const highVol = p.vol === '5m-20m' || p.vol === '500k-5m';
+    const small = devIdx === 0 && locIdx === 0 && (p.vol === 'u100k' || p.vol === '100-500k');
+
+    if (small) {
+      if (ENTRY_IDS.has(d.id) || d.id === 'ik-flyer-lite' || d.id === 'absa-mobile' || CAPITEC_IDS.has(d.id) || d.id === 'yoco-khumo' || d.id === 'fnb-go') return bumpYocoUnder100k({ kind: 'recommended', label: 'Recommended' });
+      if (d.id === 'ik-flyer' || d.id === 'yoco-neo' || d.id === 'yoco-khumo-print' || d.id === 'ned-android' || d.id === 'fnb-sp' || d.id === 'std-simply') return { kind: 'consider', label: 'Consider' };
+      if (ENTERPRISE_IDS.has(d.id) === false && (highVol && (d.category === 'Bank' && d.purchaseModel.includes('Bespoke')))) return { kind: 'consider', label: 'Consider' };
+      return { kind: 'consider', label: 'Consider' };
+    }
+
+    if (highDev || highLoc || p.vol === '5m-20m') {
+      if (ENTERPRISE_IDS.has(d.id) || d.id === 'fnb-counter' || d.id === 'absa-int') return bumpYocoUnder100k({ kind: 'recommended', label: 'Recommended' });
+      if (d.id === 'ned-android' || d.id === 'fnb-sp' || d.id === 'std-simply' || d.id === 'std-autolink' || d.id === 'absa-standalone') return { kind: 'consider', label: 'Consider' };
+      return { kind: 'consider', label: 'Consider' };
+    }
+
+    if (p.vol === '500k-5m' || devIdx === 1 || locIdx === 1) {
+      if (d.id === 'fnb-sp' || d.id === 'ned-android' || d.id === 'std-simply' || d.id === 'yoco-neo' || d.id === 'ik-flyer') return bumpYocoUnder100k({ kind: 'recommended', label: 'Recommended' });
+      if (ENTRY_IDS.has(d.id)) return { kind: 'consider', label: 'Consider' };
+      return { kind: 'consider', label: 'Consider' };
+    }
+
+    return { kind: 'consider', label: 'Consider' };
+  }
+
+  function matchesPurchaseFilter(d, f) {
+    if (f === 'all') return true;
+    const pm = (d.purchaseModel + ' ' + d.devicePrice).toLowerCase();
+    if (f === 'outright') return /outright|purchase only|buy r/i.test(d.purchaseModel) && !/rental only|rent only/i.test(d.purchaseModel) || (pm.includes('outright') && !d.purchaseModel.toLowerCase().includes('rental only'));
+    if (f === 'rental') {
+      const pm = d.purchaseModel.toLowerCase();
+      if (/buy or rent|outright only/i.test(pm)) return false;
+      return /rental only|^rental\b|enterprise.*rental|~r\d|\/mo/i.test(pm + d.devicePrice) || (pm.includes('rental') && !pm.includes('outright'));
+    }
+    if (f === 'both') return /buy or rent|buy or|or rent/i.test(d.purchaseModel) || /signup fee \+ monthly|bespoke.*rental or purchase/i.test(d.purchaseModel);
+    if (f === 'free') return /^free|free \(/.test(d.purchaseModel.trim()) || d.purchaseModel.includes('Free (');
+    if (f === 'bespoke') return /bespoke|enterprise contract/i.test(d.purchaseModel);
+    return true;
+  }
+
+  function posIsYes(val) {
+    const v = (val || '').toLowerCase();
+    if (v.startsWith('no')) return false;
+    return /yes|^\d|confirm|70\+/i.test(val);
+  }
+
+  function matchesFilters(d) {
+    const fCat = document.getElementById('fCat').value;
+    const fPurchase = document.getElementById('fPurchase').value;
+    const fSim = document.getElementById('fSim').value;
+    const fPos = document.getElementById('fPos').value;
+
+    if (fCat !== 'all' && d.category !== fCat) return false;
+    if (!matchesPurchaseFilter(d, fPurchase)) return false;
+    if (fSim !== 'all') {
+      const s = d.simIncluded;
+      if (fSim === 'Yes' && !/^yes/i.test(s)) return false;
+      if (fSim === 'No' && !/^no\b/i.test(s) && !/not provided/i.test(s)) return false;
+      if (fSim === 'Optional' && !/optional/i.test(s)) return false;
+    }
+    if (fPos === 'yes' && !posIsYes(d.posIntegration)) return false;
+    if (fPos === 'no' && posIsYes(d.posIntegration)) return false;
+    return true;
+  }
+
+  function esc(s) {
+    const t = document.createElement('div');
+    t.textContent = s == null ? '' : String(s);
+    return t.innerHTML;
+  }
+
+  function abbrev(str, max) {
+    const t = (str == null ? '' : String(str)).trim();
+    if (t.length <= max) return t;
+    return t.slice(0, Math.max(0, max - 1)) + '…';
+  }
+
+  /** Card summary only: Yes / No / Optional */
+  function simSummaryLabel(simStr) {
+    const t = (simStr == null ? '' : String(simStr)).trim();
+    if (/^optional/i.test(t)) return 'Optional';
+    if (/^yes/i.test(t)) return 'Yes';
+    if (/^no\b/i.test(t)) return 'No';
+    if (/not provided/i.test(t)) return 'No';
+    if (/optional/i.test(t)) return 'Optional';
+    return 'Yes';
+  }
+
+  function dataSummaryLabel(dataStr) {
+    const t = (dataStr == null ? '' : String(dataStr)).trim();
+    if (/^optional/i.test(t)) return 'Optional';
+    if (/^yes/i.test(t)) return 'Yes';
+    if (/^no\b/i.test(t)) return 'No';
+    if (/not provided|via phone|merchant pays/i.test(t)) return 'No';
+    if (/optional/i.test(t)) return 'Optional';
+    return 'Yes';
+  }
+
+  function editableCell(key, value, d) {
+    const edit = document.body.classList.contains('edit-mode');
+    if (!edit) return esc(value);
+    return `<span contenteditable="true" data-id="${esc(d.id)}" data-field="${esc(key)}">${esc(value)}</span>`;
+  }
+
+  function simDataSummary(d) {
+    const edit = document.body.classList.contains('edit-mode');
+    if (edit) {
+      return `<div class="card-simdata-inner"><span class="sd-line"><strong>SIM</strong> ${editableCell('simIncluded', d.simIncluded, d)}</span><span class="sd-line"><strong>Data</strong> ${editableCell('dataIncluded', d.dataIncluded, d)}</span></div>`;
+    }
+    return `<span class="sd-line"><strong>SIM</strong> ${esc(simSummaryLabel(d.simIncluded))}</span><span class="sd-dot">·</span><span class="sd-line"><strong>Data</strong> ${esc(dataSummaryLabel(d.dataIncluded))}</span>`;
+  }
+
+  function renderCards() {
+    readMerchantProfileFromDom();
+    const root = document.getElementById('cardsRoot');
+    const empty = document.getElementById('emptyMsg');
+    root.innerHTML = '';
+    const visible = devices.filter(matchesFilters);
+    if (!visible.length) {
+      empty.style.display = 'block';
+      const sv0 = document.getElementById('selectVisible');
+      if (sv0) {
+        selectVisibleSync = true;
+        sv0.checked = false;
+        selectVisibleSync = false;
+      }
+      const leg0 = document.getElementById('badgeLegend');
+      if (leg0) leg0.classList.toggle('is-hidden', !isProfileNonDefault());
+      return;
+    }
+    empty.style.display = 'none';
+
+    visible.forEach(d => {
+      const rec = getRecommendation(d);
+      const card = document.createElement('article');
+      const tier = rec.kind === 'neutral' ? 'profile-pending' : rec.kind === 'recommended' ? 'recommended' : rec.kind === 'consider' ? 'consider' : rec.kind === 'not-suitable' ? 'not-suitable' : rec.kind === 'confirm' ? 'confirm-provider' : 'profile-pending';
+      card.className = 'device-card ' + tier;
+      card.dataset.id = d.id;
+      card.dataset.provider = providerSlug(d.provider);
+
+      const checked = selected.has(d.id);
+      const badgeHtml = rec.kind === 'neutral'
+        ? '<span class="rec-badge-slot" aria-hidden="true"></span>'
+        : `<span class="rec-badge ${rec.kind === 'confirm' ? 'confirm' : rec.kind}">${esc(rec.label)}</span>`;
+      const inner = document.createElement('div');
+      inner.className = 'card-inner';
+      inner.innerHTML = `
+        <div class="card-head-top">
+          <input type="checkbox" class="card-check" data-id="${esc(d.id)}" ${checked ? 'checked' : ''} aria-label="Select ${esc(d.device)} for comparison" />
+          <div class="card-title-block">
+            <div class="card-title-row">
+              <div class="provider-device"><span class="prov">${editableCell('provider', d.provider, d)}</span><span class="sep">·</span><span class="dev">${editableCell('device', d.device, d)}</span></div>
+              ${badgeHtml}
+            </div>
+          </div>
+        </div>
+        <div class="card-purchase">${editableCell('purchaseModel', d.purchaseModel, d)}</div>
+        <div class="card-metrics">
+          <div>
+            <div class="metric-label">Price</div>
+            <div class="metric-val">${editableCell('devicePrice', d.devicePrice, d)}</div>
+          </div>
+          <div>
+            <div class="metric-label">Transaction rate</div>
+            <div class="metric-val">${editableCell('transactionRate', d.transactionRate, d)}</div>
+          </div>
+        </div>
+        <div class="card-simdata">${simDataSummary(d)}</div>`;
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'card-toggle';
+      btn.textContent = 'Details';
+      btn.setAttribute('aria-expanded', 'false');
+
+      const detail = document.createElement('div');
+      detail.className = 'card-detail';
+      detail.innerHTML = `<table class="detail-table">
+        <tr><th>Category</th><td>${editableCell('category', d.category, d)}</td></tr>
+        <tr><th>Additional monthly fees</th><td>${editableCell('monthlyFees', d.monthlyFees, d)}</td></tr>
+        <tr><th>SIM included</th><td>${editableCell('simIncluded', d.simIncluded, d)}</td></tr>
+        <tr><th>Data included</th><td>${editableCell('dataIncluded', d.dataIncluded, d)}</td></tr>
+        <tr><th>WiFi</th><td>${editableCell('wifi', d.wifi, d)}</td></tr>
+        <tr><th>SIM slots</th><td>${editableCell('simSlots', d.simSlots, d)}</td></tr>
+        <tr><th>Settlement</th><td>${editableCell('settlement', d.settlement, d)}</td></tr>
+        <tr><th>POS integration</th><td>${editableCell('posIntegration', d.posIntegration, d)}</td></tr>
+        <tr><th>Best for</th><td>${editableCell('bestFor', d.bestFor, d)}</td></tr>
+        <tr><th>Notes</th><td>${editableCell('notes', d.notes, d)}</td></tr>
+      </table>`;
+
+      let open = false;
+      btn.addEventListener('click', () => {
+        open = !open;
+        detail.classList.toggle('open', open);
+        btn.textContent = open ? 'Hide details' : 'Details';
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+
+      inner.querySelector('.card-check').addEventListener('change', e => {
+        const id = e.target.dataset.id;
+        if (e.target.checked) {
+          if (selected.size >= 4) {
+            e.target.checked = false;
+            alert('You can compare up to 4 devices.');
+            return;
+          }
+          selected.add(id);
+        } else selected.delete(id);
+        if (!selectVisibleSync) {
+          const sv = document.getElementById('selectVisible');
+          if (sv) sv.checked = false;
+        }
+        updateCompareButton();
+      });
+
+      card.appendChild(inner);
+      card.appendChild(btn);
+      card.appendChild(detail);
+      root.appendChild(card);
+    });
+
+    const sv = document.getElementById('selectVisible');
+    if (sv && visible.length) {
+      const firstN = visible.slice(0, 4).map(x => x.id);
+      const allOn = firstN.length > 0 && firstN.every(id => selected.has(id)) && selected.size === firstN.length;
+      selectVisibleSync = true;
+      sv.checked = allOn;
+      selectVisibleSync = false;
+    }
+
+    const leg = document.getElementById('badgeLegend');
+    if (leg) leg.classList.toggle('is-hidden', !isProfileNonDefault());
+  }
+
+  function onFieldBlur(e) {
+    const el = e.target;
+    if (!el.matches('[contenteditable="true"][data-id]')) return;
+    const id = el.dataset.id;
+    const field = el.dataset.field;
+    const row = devices.find(x => x.id === id);
+    if (row && FIELD_KEYS.includes(field)) row[field] = el.textContent.trim();
+  }
+
+  function updateCompareButton() {
+    document.getElementById('compareCount').textContent = selected.size;
+    document.getElementById('btnCompare').disabled = selected.size < 2;
+  }
+
+  const ROW_LABELS = {
+    provider: 'Provider', device: 'Device', category: 'Category', purchaseModel: 'Purchase model',
+    devicePrice: 'Device price', transactionRate: 'Transaction rate', monthlyFees: 'Additional monthly fees',
+    simIncluded: 'SIM included', dataIncluded: 'Data included', wifi: 'WiFi', simSlots: 'SIM slots',
+    settlement: 'Settlement timing', posIntegration: 'POS integration', bestFor: 'Best for', notes: 'Notes'
+  };
+
+  function openDrawer() {
+    const ids = Array.from(selected);
+    if (ids.length < 2) return;
+    const rows = devices.filter(d => ids.includes(d.id));
+    const table = document.getElementById('compareTable');
+    let html = '<thead><tr><th>Field</th>';
+    rows.forEach(d => { html += `<th class="col-device">${esc(d.provider)} — ${esc(d.device)}</th>`; });
+    html += '</tr></thead><tbody>';
+    FIELD_KEYS.forEach(k => {
+      html += `<tr><th>${esc(ROW_LABELS[k] || k)}</th>`;
+      rows.forEach(d => { html += `<td>${esc(d[k])}</td>`; });
+      html += '</tr>';
+    });
+    html += '</tbody>';
+    table.innerHTML = html;
+    document.getElementById('drawerOverlay').classList.add('open');
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('drawer').setAttribute('aria-hidden', 'false');
+  }
+
+  function closeDrawer() {
+    document.getElementById('drawerOverlay').classList.remove('open');
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('drawer').setAttribute('aria-hidden', 'true');
+  }
+
+  function mpExportLabel(key) {
+    const el = document.querySelector('#stitchMerchantProfile select[data-mp="' + key + '"]');
+    if (!el || !el.selectedOptions || !el.selectedOptions[0]) return '';
+    return el.selectedOptions[0].textContent;
+  }
+
+  function exportCsv() {
+    const p = getProfile();
+    const visible = devices.filter(matchesFilters);
+    const headers = ['merchant_volume', 'merchant_devices', 'merchant_locations', ...FIELD_KEYS.map(k => ROW_LABELS[k] || k)];
+    const lines = [headers.map(h => csvEscape(h)).join(',')];
+    visible.forEach(d => {
+      const row = [
+        mpExportLabel('vol'),
+        mpExportLabel('devices'),
+        mpExportLabel('locs'),
+        ...FIELD_KEYS.map(k => csvEscape(d[k]))
+      ];
+      lines.push(row.join(','));
+    });
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'stitch-provider-comparison.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function csvEscape(s) {
+    const t = String(s == null ? '' : s);
+    if (/[",\n]/.test(t)) return '"' + t.replace(/"/g, '""') + '"';
+    return t;
+  }
+
+  (function bindMerchantProfile() {
+    const panel = document.getElementById('stitchMerchantProfile');
+    if (!panel) return;
+    function onMp() {
+      readMerchantProfileFromDom();
+      renderCards();
+    }
+    panel.querySelectorAll('select[data-mp]').forEach(function (sel) {
+      sel.addEventListener('change', onMp);
+      sel.addEventListener('input', onMp);
+    });
+  })();
+  ['fCat', 'fPurchase', 'fSim', 'fPos'].forEach(id => {
+    document.getElementById(id).addEventListener('change', () => {
+      const sv = document.getElementById('selectVisible');
+      if (sv && !selectVisibleSync) sv.checked = false;
+      renderCards();
+    });
+  });
+
+  document.getElementById('selectVisible').addEventListener('change', e => {
+    const visible = devices.filter(matchesFilters);
+    selectVisibleSync = true;
+    if (e.target.checked) {
+      selected.clear();
+      visible.slice(0, 4).forEach(d => selected.add(d.id));
+    } else {
+      selected.clear();
+    }
+    selectVisibleSync = false;
+    renderCards();
+    updateCompareButton();
+  });
+
+  document.getElementById('btnCompare').addEventListener('click', openDrawer);
+  document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+  document.getElementById('drawerOverlay').addEventListener('click', closeDrawer);
+
+  document.getElementById('btnExport').addEventListener('click', exportCsv);
+
+  document.getElementById('editMode').addEventListener('change', e => {
+    document.body.classList.toggle('edit-mode', e.target.checked);
+    document.getElementById('btnSave').style.display = e.target.checked ? 'inline-block' : 'none';
+    document.getElementById('btnReset').style.display = e.target.checked ? 'inline-block' : 'none';
+    renderCards();
+  });
+
+  document.getElementById('btnSave').addEventListener('click', () => {
+    document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+      const id = el.dataset.id;
+      const field = el.dataset.field;
+      const row = devices.find(x => x.id === id);
+      if (row && FIELD_KEYS.includes(field)) row[field] = el.textContent.trim();
+    });
+    saveStored();
+    alert('Saved to this browser (localStorage).');
+  });
+
+  document.getElementById('btnReset').addEventListener('click', () => {
+    if (confirm('Reset all device data to defaults?')) resetDefaults();
+  });
+
+  document.getElementById('cardsRoot').addEventListener('blur', onFieldBlur, true);
+
+  (function themeInit() {
+    const KEY = 'stitch-theme';
+    function paint(theme) {
+      const t = theme === 'dark' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+      document.documentElement.style.colorScheme = t === 'dark' ? 'dark' : 'light';
+      const dark = t === 'dark';
+      const sun = document.querySelector('.theme-icon-sun');
+      const moon = document.querySelector('.theme-icon-moon');
+      if (sun) sun.style.display = dark ? 'none' : 'inline';
+      if (moon) moon.style.display = dark ? 'inline' : 'none';
+    }
+    function resolved() {
+      const s = localStorage.getItem(KEY);
+      if (s === 'dark' || s === 'light') return s;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    paint(resolved());
+    document.getElementById('themeToggle').addEventListener('click', function (e) {
+      e.preventDefault();
+      const cur = document.documentElement.getAttribute('data-theme') || 'light';
+      const next = cur === 'dark' ? 'light' : 'dark';
+      localStorage.setItem(KEY, next);
+      paint(next);
+    });
+  })();
+
+  loadStored();
+  renderCards();
+  updateCompareButton();
+})();
+  </script>
+</body>
+</html>
