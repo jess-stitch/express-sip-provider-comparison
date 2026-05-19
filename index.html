@@ -289,6 +289,126 @@
       white-space: nowrap;
     }
     .select-visible-wrap input { accent-color: var(--accent-bar-rec); cursor: pointer; }
+    .filter-chip-sales-intel {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: #5b21b6;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+      padding: 0.45rem 0.7rem;
+      border-radius: 8px;
+      border: 1px solid #7c3aed;
+      background: transparent;
+      transition: background 0.15s, color 0.15s;
+    }
+    .filter-chip-sales-intel:hover { background: #f3f0ff; }
+    .filter-chip-sales-intel:has(input:checked) {
+      background: #f3f0ff;
+      color: #5b21b6;
+    }
+    [data-theme="dark"] .filter-chip-sales-intel {
+      color: #c4b5fd;
+      border-color: #7c3aed;
+    }
+    [data-theme="dark"] .filter-chip-sales-intel:hover,
+    [data-theme="dark"] .filter-chip-sales-intel:has(input:checked) {
+      background: #2e1065;
+      color: #c4b5fd;
+    }
+    .filter-chip-sales-intel input { accent-color: #7c3aed; cursor: pointer; }
+    .sales-intel-banner {
+      background: #f3f0ff;
+      color: #5b21b6;
+      font-size: 0.8125rem;
+      line-height: 1.45;
+      padding: 0.55rem 1.5rem;
+      text-align: center;
+    }
+    [data-theme="dark"] .sales-intel-banner {
+      background: #2e1065;
+      color: #c4b5fd;
+    }
+    .sales-intel-pill {
+      flex-shrink: 0;
+      padding: 0.15rem 0.4rem;
+      border-radius: 6px;
+      font-size: 0.625rem;
+      font-weight: 600;
+      color: #7c3aed;
+      border: 1px solid #7c3aed;
+      background: transparent;
+      line-height: 1.2;
+    }
+    [data-theme="dark"] .sales-intel-pill {
+      color: #c4b5fd;
+      border-color: #a78bfa;
+    }
+    .card-title-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.35rem 0.5rem;
+      min-width: 0;
+    }
+    .card-toggle-sales-intel {
+      margin-top: 0.5rem;
+    }
+    .sales-intel-panel {
+      display: none;
+      margin: 0 0.75rem 0.75rem;
+      padding: 0.75rem 0.85rem;
+      background: #faf5ff;
+      border-left: 3px solid #7c3aed;
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+      font-size: 0.75rem;
+    }
+    .sales-intel-panel.open { display: block; }
+    [data-theme="dark"] .sales-intel-panel {
+      background: #2e1065;
+    }
+    .sales-intel-panel h4 {
+      margin: 0 0 0.65rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: #5b21b6;
+    }
+    [data-theme="dark"] .sales-intel-panel h4 {
+      color: #c4b5fd;
+    }
+    .sales-intel-sub {
+      margin: 0 0 0.5rem;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .sales-intel-sub.confirmed { color: var(--green-text); }
+    .sales-intel-sub.differs { color: var(--amber-text); }
+    .sales-intel-panel ul {
+      margin: 0 0 0.75rem;
+      padding-left: 1.1rem;
+    }
+    .sales-intel-panel ul:last-of-type { margin-bottom: 0.5rem; }
+    .sales-intel-panel li {
+      margin-bottom: 0.35rem;
+      line-height: 1.45;
+      color: var(--text);
+    }
+    .sales-intel-panel ul.si-confirmed li::marker { color: var(--green-text); }
+    .sales-intel-panel ul.si-differs li {
+      color: var(--amber-text);
+    }
+    .sales-intel-panel ul.si-differs li::marker { color: var(--amber-text); }
+    .sales-intel-footnote {
+      margin: 0.65rem 0 0;
+      font-size: 0.6875rem;
+      font-style: italic;
+      color: var(--text-muted);
+    }
     .badge-legend {
       display: flex;
       flex-wrap: wrap;
@@ -397,6 +517,7 @@
       font-size: 0.75rem;
     }
     .provider-device .sep { color: var(--text-faint); margin: 0 0.2rem; font-weight: 400; }
+    .provider-device .sales-intel-pill { margin-left: 0.3rem; vertical-align: middle; }
     .rec-badge {
       flex-shrink: 0;
       padding: 0.2rem 0.45rem;
@@ -609,6 +730,10 @@
     </div>
   </header>
 
+  <div class="sales-intel-banner" role="note">
+    🔍 Some cards below include Sales Intel — findings from direct sign-ups and purchases by the Stitch team, not just public website data.
+  </div>
+
   <main class="main">
     <div class="page-intro panel">
       <div class="panel-intro-label">Filter by merchant profile</div>
@@ -682,6 +807,10 @@
               <option value="no">No</option>
             </select>
           </div>
+          <label class="filter-chip-sales-intel" title="Show only cards with Stitch team research">
+            <input type="checkbox" id="fSalesIntel" />
+            Sales Intel only
+          </label>
           <div class="filter-toolbar-actions">
             <label class="select-visible-wrap" title="Selects up to 4 devices (comparison limit)">
               <input type="checkbox" id="selectVisible" />
@@ -758,6 +887,69 @@
   const ENTERPRISE_IDS = new Set(['ned-int', 'absa-int', 'std-autoswitch']);
   const CAPITEC_IDS = new Set(['cap-pro', 'cap-print']);
   const ADUMO_IDS = new Set(['adumo-flow', 'adumo-connect', 'adumo-infinite']);
+  const SALES_INTEL_IDS = new Set(['cap-pro', 'cap-print', 'yoco-khumo-print', 'fnb-go', 'fnb-sp']);
+
+  const SALES_INTEL_CAPITEC = {
+    confirmed: [
+      'Connectivity is included with the device — no separate data fee confirmed',
+      'Entrepreneur Account has no monthly fixed cost confirmed',
+      'Tiered rate card confirmed in full: 1.85% debit and credit for R0–R49K turnover. After 3 consecutive months at higher brackets: 0.85% debit / 1.85% credit for R50K–R499K, 0.70% debit / 1.70% credit for R500K–R999K, 0.60% debit / 1.60% credit for R1M+'
+    ],
+    differs: [
+      'R50/month fee appears during sign-up — purpose not specified by Capitec. Website does not mention this fee anywhere. Nature of this fee is unconfirmed — could be account fee, could be connectivity related.',
+      'Network choice is active during sign-up — merchant can choose between Vodacom, MTN, or Capitec network. Website states SIM is Capitec-managed but does not mention that the merchant selects the network themselves.',
+      'Terminal prices quoted during sign-up are R750 (Pro) and R1,500 (Print). Website lists R699 and R1,399. Discrepancy of R51 on Pro and R101 on Print — reason not explained during sign-up process.'
+    ]
+  };
+
+  const SALES_INTEL_YOCO_KHUMO_PRINT = {
+    confirmed: [
+      'Khumo Print price R1,499 confirmed',
+      'Connectivity fee R49/month confirmed',
+      'Free delivery confirmed — fulfilled within 24 hours',
+      'SIM comes preloaded in the device — no setup required'
+    ],
+    differs: [
+      'Connectivity fee billing method is not clearly explained on the website. In practice it is only charged in months where the device is actually used, and is netted from the first payout of the following month — it is not charged upfront or as a separate invoice. This is merchant-friendly but not stated clearly publicly.',
+      'Carrier and network not disclosed at point of purchase — SIM is preloaded but the merchant is not told which network it uses.',
+      'Transaction pricing has significantly more tiers and card types than the standard rate shown on the website. Website prominently shows only the base local in-person rate. Full rate card from direct sign-up is: In-person local card 2.7% for R0–R100K turnover / 2.5% for R100K–R200K. In-person international card 3.2% / 2.75%. In-person AMEX 3.4% / 3.0%. Online local card 2.95% / 2.55%. Online international and AMEX 3.4% / 3.2%. International, AMEX and all online rates are not shown prominently on the public website — merchants may not be aware of these higher rates until after sign-up.'
+    ]
+  };
+
+  const SALES_INTEL_FNB = {
+    confirmed: [
+      'Local debit card rate 1.8% confirmed',
+      'Local credit card rate 1.8% confirmed',
+      'Foreign card rate 2.5% confirmed',
+      'UnionPay rate 2.5% confirmed'
+    ],
+    differs: [
+      'Rental per month for standard Speedpoint is R320. FNB does not publish rental rates on their website — this is the first confirmed figure from direct sign-up.',
+      'Minimum Monthly Fee (MMF) of R350/month applies and is not mentioned on the FNB website. This means if a merchant\'s total transaction fees for the month are less than R350, they are charged R350 regardless. A merchant processing R5,000 in a quiet month at 1.8% generates R90 in fees but would be charged R350. This is a significant hidden cost for low-volume or seasonal merchants.',
+      'Device insurance is mandatory and entirely the merchant\'s responsibility. FNB requires merchants to insure equipment at their own cost: R7,000 insured value for the Speedpoint device and R3,500 for the Speedpoint Go. This is an ongoing cost not mentioned anywhere on the FNB website or in public pricing materials.',
+      'Device fulfilment is slower than expected — sign-up was completed but device had not been delivered at time of writing. No confirmed delivery timeline was given by FNB.'
+    ]
+  };
+
+  function getSalesIntel(d) {
+    if (CAPITEC_IDS.has(d.id)) return SALES_INTEL_CAPITEC;
+    if (d.id === 'yoco-khumo-print') return SALES_INTEL_YOCO_KHUMO_PRINT;
+    if (d.id === 'fnb-go' || d.id === 'fnb-sp') return SALES_INTEL_FNB;
+    return null;
+  }
+
+  function salesIntelBullets(items) {
+    return items.map(item => '<li>' + esc(item) + '</li>').join('');
+  }
+
+  function renderSalesIntelPanel(si) {
+    return '<h4>🔍 Sales Intel</h4>' +
+      '<p class="sales-intel-sub confirmed">✅ Confirmed</p>' +
+      '<ul class="si-confirmed">' + salesIntelBullets(si.confirmed) + '</ul>' +
+      '<p class="sales-intel-sub differs">⚠️ Differs from website</p>' +
+      '<ul class="si-differs">' + salesIntelBullets(si.differs) + '</ul>' +
+      '<p class="sales-intel-footnote">Research conducted by Stitch team via direct sign-up or purchase. Data collected May 2026.</p>';
+  }
 
   function cloneDevices(src) {
     return src.map(d => ({ ...d }));
@@ -946,6 +1138,8 @@
     }
     if (fPos === 'yes' && !posIsYes(d.posIntegration)) return false;
     if (fPos === 'no' && posIsYes(d.posIntegration)) return false;
+    const fSiEl = document.getElementById('fSalesIntel');
+    if (fSiEl && fSiEl.checked && !SALES_INTEL_IDS.has(d.id)) return false;
     return true;
   }
 
@@ -1025,6 +1219,8 @@
       card.dataset.provider = providerSlug(d.provider);
 
       const checked = selected.has(d.id);
+      const si = getSalesIntel(d);
+      const siPill = si ? '<span class="sales-intel-pill">Sales Intel</span>' : '';
       const badgeHtml = rec.kind === 'neutral'
         ? '<span class="rec-badge-slot" aria-hidden="true"></span>'
         : `<span class="rec-badge ${rec.kind === 'confirm' ? 'confirm' : rec.kind}">${esc(rec.label)}</span>`;
@@ -1035,7 +1231,7 @@
           <input type="checkbox" class="card-check" data-id="${esc(d.id)}" ${checked ? 'checked' : ''} aria-label="Select ${esc(d.device)} for comparison" />
           <div class="card-title-block">
             <div class="card-title-row">
-              <div class="provider-device"><span class="prov">${editableCell('provider', d.provider, d)}</span><span class="sep">·</span><span class="dev">${editableCell('device', d.device, d)}</span></div>
+              <div class="provider-device"><span class="prov">${editableCell('provider', d.provider, d)}</span>${siPill}<span class="sep">·</span><span class="dev">${editableCell('device', d.device, d)}</span></div>
               ${badgeHtml}
             </div>
           </div>
@@ -1102,6 +1298,30 @@
       card.appendChild(inner);
       card.appendChild(btn);
       card.appendChild(detail);
+
+      if (si) {
+        const siBtn = document.createElement('button');
+        siBtn.type = 'button';
+        siBtn.className = 'card-toggle card-toggle-sales-intel';
+        siBtn.textContent = '🔍 Sales Intel';
+        siBtn.setAttribute('aria-expanded', 'false');
+
+        const siPanel = document.createElement('div');
+        siPanel.className = 'sales-intel-panel';
+        siPanel.innerHTML = renderSalesIntelPanel(si);
+
+        let siOpen = false;
+        siBtn.addEventListener('click', () => {
+          siOpen = !siOpen;
+          siPanel.classList.toggle('open', siOpen);
+          siBtn.textContent = siOpen ? 'Hide Sales Intel' : '🔍 Sales Intel';
+          siBtn.setAttribute('aria-expanded', siOpen ? 'true' : 'false');
+        });
+
+        card.appendChild(siBtn);
+        card.appendChild(siPanel);
+      }
+
       root.appendChild(card);
     });
 
@@ -1217,6 +1437,12 @@
       if (sv && !selectVisibleSync) sv.checked = false;
       renderCards();
     });
+  });
+
+  document.getElementById('fSalesIntel').addEventListener('change', () => {
+    const sv = document.getElementById('selectVisible');
+    if (sv && !selectVisibleSync) sv.checked = false;
+    renderCards();
   });
 
   document.getElementById('selectVisible').addEventListener('change', e => {
